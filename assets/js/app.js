@@ -34,6 +34,33 @@ if (window.devicePixelRatio > 1) {
     ctx.scale(2, 2);
 }
 
+// function to create bounds around town and set map view around town
+function setMapBoundsAroundTown(town) {
+    // town is value from pull down list
+    // change this to true if value of "town" exists in object
+    var townExists = false;
+    
+    if (townsBounds.hasOwnProperty(town)) {        
+        townExists = true;        
+    } else {       
+        return;
+        console.log(`The Town ${town} does not exist in object`);
+    }
+    
+    // if town exists, get bounding box coordinates and set map view
+    // should I test that properties exist?
+    if (townExists) {
+        //southwest corner of bounding box
+        var sw = new mapboxgl.LngLat(townsBounds[town].sw[0],townsBounds[town].sw[1]);
+        // northeast corner of bounding box
+        var ne = new mapboxgl.LngLat(townsBounds[town].ne[0],townsBounds[town].ne[1]);
+        // create bounding box
+        var boundingBox = new mapboxgl.LngLatBounds(sw, ne);
+        // set map bounds around town's bounding box
+        map.fitBounds(boundingBox);
+    }
+}
+
 /* map magic */
 map.on('load', function () {
     updateOrientations(ctx,map);
@@ -49,6 +76,16 @@ map.on('load', function () {
         paint: {
             'line-color': '#000',
             'line-width': 2
+        }
+    });
+    
+    // add towns
+    map.addLayer({
+        id: 'towns',
+        type: 'circle',
+        source: {
+            type: 'geojson',
+            data: './assets/data/towns.geojson'
         }
     });
     
